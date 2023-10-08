@@ -264,7 +264,7 @@ async def check_bedtime():
 
     # Begin Bedtime event
     if current_time == bedTime and not bedtime_message_sent:
-        await channel.send(f"@ here\n# It's Bedtime!!!!!\n### No More Chatting Until Morning Time!\n*Everyone Has Been Muted.*\n{gifLinkBedtime}")
+        await channel.send(f"@here\n# It's Bedtime!!!!!\n### No More Chatting Until Morning Time!\n*Everyone Has Been Muted.*\n{gifLinkBedtime}")
 
         # Mute everyone in the server
         for guild_member in channel.guild.members:
@@ -284,6 +284,11 @@ async def check_bedtime():
         for guild_member in channel.guild.members:
             if isinstance(guild_member, Member) and guild_member.voice and guild_member.voice.mute:
                 await guild_member.edit(mute=False)
+
+        # Disconnect from the voice channel
+        voice_client = channel.guild.voice_client
+        if voice_client and voice_client.is_connected():
+            await voice_client.disconnect()
 
         morningtime_message_sent = True # Update flag variable
 
