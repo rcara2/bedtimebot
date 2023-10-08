@@ -35,7 +35,7 @@ morning_last_reset = datetime.now()
 
 # Song folder name
 sfxDirectory = 'songs'
-bedtimeSong = sfxDirectory + "/song.mp3"
+bedtimeSong = sfxDirectory + "/bach.mp3"
 
 # Gif links (tenor)
 gifLink1 = 'https://tenor.com/view/good-night-sweet-dreams-sleep-well-gif-4015556980797084553'
