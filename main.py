@@ -35,6 +35,7 @@ morning_last_reset = datetime.now()
 
 # Song folder name
 sfxDirectory = 'songs'
+bedtimeSong = sfxDirectory + "/song.mp3"
 
 # Gif links (tenor)
 gifLink1 = 'https://tenor.com/view/good-night-sweet-dreams-sleep-well-gif-4015556980797084553'
@@ -49,7 +50,6 @@ gifLink9 = 'https://tenor.com/view/good-night-rose-flower-sparkle-glitter-gif-66
 gifLinkGoku = 'https://tenor.com/view/goku-go-to-sleep-go-to-bed-super-saiyan-dragon-ball-gif-22557544'
 gifLinkBedtime = 'https://tenor.com/view/bed-time-for-me-server-gif-19666702'
 gifLinkMorningtime = 'https://tenor.com/view/good-morning-gif-2770330610160702524'
-
 
 class SimpleCommands(commands.Cog):
     def __init__(self, bot):
@@ -230,21 +230,19 @@ class Music(commands.Cog):
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-# Used in the Bedtime event
-async def join_voice_channel_and_mute(self, channel):
-    members_in_voice_channels = [vc for vc in channel.guild.voice_channels if vc.members]
 
+# Used in the Bedtime event
+async def join_voice_channel_and_mute(guild):
+    members_in_voice_channels = [vc for vc in guild.voice_channels if vc.members]
     if members_in_voice_channels:
         target_channel = members_in_voice_channels[0]
     else:
-        target_channel = channel.guild.voice_channels[0]
+        target_channel = guild.voice_channels[0]
 
-    if self.bot.voice_clients:
-        voice_client = self.bot.voice_clients[0]
-        if voice_client.is_connected():
-            await voice_client.move_to(target_channel)
-    else:
-        await target_channel.connect()
+    if target_channel:
+        voice_client = await target_channel.connect()
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(bedtimeSong))
+        voice_client.play(source, after=lambda e: print(f'Player error: {e}') if e else None)
     
 
 # Check every 5 seconds, and then go on a 1 hour cooldown for each event
@@ -273,18 +271,8 @@ async def check_bedtime():
             if isinstance(guild_member, Member) and guild_member != channel.guild.me:
                 await guild_member.edit(mute=True)
         
-        # Join a voice channel
-        voice_channel_id = int(os.getenv('VC_CHANNEL_ID'))
-        voice_channel = bot.get_channel(voice_channel_id)
-
-        voice_client = channel.guild.voice_client
-        if voice_client and voice_client.is_connected():
-            await voice_client.move_to(voice_channel)
-        else:
-            await voice_channel.connect()
-
         # Continue playing random songs
-        # TODO: this
+        await join_voice_channel_and_mute(channel.guild)
 
         bedtime_message_sent = True  # Update flag variable
 
